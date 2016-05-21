@@ -25,27 +25,52 @@ func Gcd(a, b int64) int64 {
 
 func main() {
 	lp := flag.Int("l", 100000, "Length of Loop")
+	verboseP := flag.Bool("v", false, "verbose mode: output each duration")
 	flag.Parse()
 	l := *lp
+	verbose := *verboseP
+
+	durationList := make([]time.Duration, l)
+	//lastDuration := time.Duration(0)
 	start := time.Now()
-	this := start
-	durationList := make([]time.Duration, 1, l)
-	lastDuration := time.Duration(0)
-	for i := 1; i < l; i++ {
-		this = time.Now()
-		d := this.Sub(start)
-		if d != lastDuration {
-			durationList = append(durationList, d)
-			lastDuration = d
+	for i := 0; i < l; i++ {
+		durationList[i] = time.Since(start)
+	}
+	if verbose {
+		for k, d := range durationList {
+			fmt.Println(k, "\t", d)
 		}
 	}
 
 	dl := len(durationList)
 	if dl > 1 {
+		minDurationDiff := durationList[1] - durationList[0]
 		for i := 1; i < dl; i++ {
-			fmt.Println(durationList[i])
+			d := durationList[i] - durationList[i-1]
+			if d < minDurationDiff {
+				minDurationDiff = d
+			}
+		}
+		fmt.Println("min duration diff: ", minDurationDiff)
+
+		minDurationDiffNotZeroInit := time.Hour
+		minDurationDiffNotZero := minDurationDiffNotZeroInit
+		for i := 1; i < dl; i++ {
+			d := durationList[i] - durationList[i-1]
+			if d < minDurationDiffNotZero && d != 0 {
+				minDurationDiffNotZero = d
+			}
+		}
+		if minDurationDiffNotZero == minDurationDiffNotZeroInit {
+			fmt.Println("min duration diff (not zero): N/A")
+		} else {
+			fmt.Println("min duration diff (not zero): ", minDurationDiffNotZero)
+		}
+
+		for i := 1; i < dl; i++ {
 			durationList[i] = time.Duration(Gcd(int64(durationList[i]), int64(durationList[i-1])))
 		}
+		fmt.Println("GCD: ", durationList[dl-1])
 	}
-	fmt.Println("GCD: ", durationList[dl-1])
+
 }
