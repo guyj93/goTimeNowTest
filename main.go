@@ -45,32 +45,36 @@ func main() {
 	dl := len(durationList)
 	if dl > 1 {
 		minDurationDiff := durationList[1] - durationList[0]
+		minDurationDiffNotZeroInit := time.Hour
+		minDurationDiffNotZero := minDurationDiffNotZeroInit
+		noRepeatdurationList := []time.Duration{durationList[0]}
+		avgDurationPerLoop := time.Duration(0)
 		for i := 1; i < dl; i++ {
 			d := durationList[i] - durationList[i-1]
 			if d < minDurationDiff {
 				minDurationDiff = d
 			}
+			if d != 0 {
+				noRepeatdurationList = append(noRepeatdurationList, durationList[i])
+				avgDurationPerLoop = durationList[i] / time.Duration(i)
+				if d < minDurationDiffNotZero {
+					minDurationDiffNotZero = d
+				}
+			}
+
 		}
 		fmt.Println("min duration diff: ", minDurationDiff)
-
-		minDurationDiffNotZeroInit := time.Hour
-		minDurationDiffNotZero := minDurationDiffNotZeroInit
-		for i := 1; i < dl; i++ {
-			d := durationList[i] - durationList[i-1]
-			if d < minDurationDiffNotZero && d != 0 {
-				minDurationDiffNotZero = d
-			}
-		}
 		if minDurationDiffNotZero == minDurationDiffNotZeroInit {
 			fmt.Println("min duration diff (not zero): N/A")
 		} else {
 			fmt.Println("min duration diff (not zero): ", minDurationDiffNotZero)
 		}
-
-		for i := 1; i < dl; i++ {
-			durationList[i] = time.Duration(Gcd(int64(durationList[i]), int64(durationList[i-1])))
+		nrdl := len(noRepeatdurationList)
+		for i := 1; i < nrdl; i++ {
+			noRepeatdurationList[i] = time.Duration(Gcd(int64(noRepeatdurationList[i]), int64(noRepeatdurationList[i-1])))
 		}
-		fmt.Println("GCD: ", durationList[dl-1])
+		fmt.Println("GCD: ", noRepeatdurationList[nrdl-1])
+		fmt.Println("avg duration per loop:", avgDurationPerLoop)
 	}
 
 }
